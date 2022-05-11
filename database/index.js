@@ -1,7 +1,13 @@
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb://localhost/githubRepos', {useNewUrlParser: true, useUnifiedTopology: true});
 
+
+mongoose.connect('mongodb://localhost/githubRepos', {
+useNewUrlParser: true,
+useUnifiedTopology: true,
+useCreateIndex: true,
+useFindAndModify: true,
+})
 const db = mongoose.connection;
 
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -11,13 +17,12 @@ db.once('open', function() {
 
 let repoSchema = new mongoose.Schema({
   userName: String,
-  repos: {
-    type: Array,
-    trim: true,
-    required: true,
-    maxlength: 3200
-  }
-  // repos: [{id: String, repo: String, forkCount: Number}]
+  id: {
+    type: String,
+    unique: true
+  },
+  repoName: String,
+  forkCount: String
 
 });
 
@@ -25,56 +30,81 @@ let repoSchema = new mongoose.Schema({
 
 let Repo = mongoose.model('Repo', repoSchema);
 
-
-
-
-let save = (userName, reposArray, callback) => {
+let save = (userName, id, repoName, forkCount, callback) => {
   // This function should save a repo or repos to
   // the MongoDB
 
-  console.log('we are in the save function', userName, reposArray)
-  const newEntry = new Repo({userName: userName, repos: reposArray});
-  // db.repos.createIndex( { userName: 1 }, { unique: true })
+  // console.log('we are in the save function', userName, id, repoName, forkCount)
+  const newEntry = new Repo();
   // TODO: considering unique columns.
 
-
-  newEntry.save()
-  .then((err) => {
-    callback(err)
+  Repo.updateOne({id}, {userName: userName, id:id, repoName:repoName, forkCount:forkCount}, {upsert:true}, (error, writeOpResult) => {
+    if (error) {
+      callback(error, null)
+    } else {
+      callback(null, writeOpResult)
+    }
   })
-  .catch((err) => {
 
-    callback(err);
-  })
+
+
 }
+
+// Promise.all(repos).then(repos) => {
 
 
 let getTop25ByUsername = (user, callback) => {
 
-  // let coach = 'EtoKruto'
-  Repo.findOne({userName:'EtoKruto'})
+  // console.log(user)
+  // Repo.findOne({userName:'EtoKruto'})
+  Repo.find({userName: user}).sort( { forkCount: 1 } ).limit( 25 )
   .then((collection) => {
-    console.log('colleciton inside geTOP25', collection)
+    // console.log('colleciton inside geTOP25', collection)
 
-    let sortedCollection = collection.sort((z, a) => (a.forkCount >= z.forkCount ? 1 : -1));
-    let sort25Collection = sortedCollection.slice(0, 25);
+    callback(collection)
 
-    callback(sort25Collection)
+
   })
   .catch((err) => {
-    console.log('error inside geTOP25', err)
+    // console.log('error inside geTOP25', err)
     callback(err);
   })
 
-  console.log('username INSIDE getTop25', collection);
-  // db.newEntry.findOne({ name: username }, callback);
-  //should return an array of users with that username (should be only one)
 
-  console.log('we are in the getTop25ByUsername function')
-  callback (collection);
 };
 
+
+let getTop25 = (user, callback) => {
+  // TODO: Get Top 25 USERS
+  Repo.find().sort( { forkCount: 1 } ).limit( 25 )
+  .then((collection) => {
+    console.log('collection inside geTOP25', collection)
+
+    callback(collection)
+
+
+  })
+  .catch((err) => {
+    // console.log('error inside geTOP25', err)
+    callback(err);
+  })
+};
 
 
 module.exports.save = save;
 module.exports.getTop25ByUsername = getTop25ByUsername;
+module.exports.getTop25 = getTop25;
+
+
+
+// let sortedCollection = collection.repos.sort((z, a) => (a.forkCount >= z.forkCount ? 1 : -1));
+// let sort25Collection = sortedCollection.slice(0, 25);
+
+// callback(sort25Collection)
+
+// console.log('username INSIDE getTop25', collection);
+// // db.newEntry.findOne({ name: username }, callback);
+// //should return an array of users with that username (should be only one)
+
+// console.log('we are in the getTop25ByUsername function')
+// callback (collection);

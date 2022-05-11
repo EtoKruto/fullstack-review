@@ -18,12 +18,12 @@ let getReposByUsername = (userName, callback) => {
     }
   };
 
-  axios(options)
-  .then(function (response) {
-    // console.log('GITHUB RESPONSE', response.data);
-    callback(response.data)
+  return axios(options)
+  // .then(function (response) {
+  //   // console.log('GITHUB RESPONSE', response.data);
+  //   callback(userName, response.data)
 
-  });
+  // });
 
 
 }
