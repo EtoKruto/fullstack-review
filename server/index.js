@@ -10,17 +10,24 @@ app.use(express.urlencoded());
 app.get('/repos', function (req, res) {
   // TODO - your code here!
   // This route should send back the top 25 repos
-  mongooseDB.getTop25((collection) => {
-    if (!colleciton) {
-      res.sendStatus(405)
-    } else {
-      console.log('AND WE ARE BACK to GET', collection)
-      res.status(200).send(JSON.stringify(collection))
-      //possibly res.status(200).json(collection)
-      // TODO: make sure the console log shows up here.
+  // mongooseDB.getTop25((collection) => {
+  //   if (!colleciton) {
+  //     res.sendStatus(405)
+  //   } else {
+  //     console.log('AND WE ARE BACK to GET', collection)
+  //     res.status(200).send(JSON.stringify(collection))
+  //     //possibly res.status(200).json(collection)
+  //     // TODO: make sure the console log shows up here.
 
-    }
-  });
+  //   }
+  // });
+
+  mongooseDB.getTop25()
+  .then((data) => {
+    // console.log('data from getTop25', data)
+    res.send(data);
+  })
+
 
 
 });
@@ -34,32 +41,23 @@ app.post('/repos', function (req, res) {
   // console.log('req', req)
   // console.log('req.body', req.body.searchedTerm)
 
+  // console.log('req',req.body.username);
+  // console.log('req.data', req.vody);
+  // console.log('req.data', req.body.searchedTerm);
+  // console.log('req.data', req.body);
+  // console.log('req.data', req.data.searchedTerm);
 
+  // if(req.body.searchedTerm === 'firstLoad') {
 
-  console.log('req',req);
-  console.log('req.data', req.vody);
-  console.log('req.data', req.body.searchedTerm);
-  console.log('req.data', req.body);
-  console.log('req.data', req.data.searchedTerm);
+  gitHubHelper.getReposByUsername(req.body.username, (repos) => {
+    // console.log('repos', repos);
+    mongooseDB.save(repos)
+    .then(()=> res.sendStatus(201))
 
-  if(req.body.searchedTerm === 'firstLoad') {
-
-    mongooseDB.getTop25ByUsername(req.body.searchedTerm, (collection) => {
-      if (!collection) {
-        res.sendStatus(405)
-      } else {
-        console.log('AND WE ARE BACK to GET', collection)
-        res.status(200).send(JSON.stringify(collection))
-        //possibly res.status(200).json(collection)
-        // TODO: make sure the console log shows up here.
-
-      }
-    });
-  } else {
     // gitHubHelper.getReposByUsername(req.body.searchedTerm, (userName, repos) => {
 
 
-    //   console.log('userName, repos', userName, repos[0])
+    //   // console.log('userName, repos', userName, repos[0])
     //   repos.forEach(repo => {
     //     mongooseDB.save(userName, repo.id, repo.name, repo.forks_count, (err, writeOpResult) => {
     //       if (err) {
@@ -75,14 +73,14 @@ app.post('/repos', function (req, res) {
     // })
 
 
-  }
+    // }
 
 
+  });
+
+  // Promise.all([promise1, promise2, promise3]).then((values) => {
+  //   console.log(values);
 });
-
-// Promise.all([promise1, promise2, promise3]).then((values) => {
-//   console.log(values);
-// });
 
 
 

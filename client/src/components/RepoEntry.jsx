@@ -5,7 +5,12 @@ const RepoEntry = ({repo, handleRepoListEntry}) => {
   return (
     <div className="repo-list-title"
     onClick={() => {handleRepoListEntry(repo)}}
-    >{repo.userName}
+    >
+    <span>User Name {console.log(repo.owner)}</span>
+    <span>Repo Name: {repo.name}</span>
+    <span>Fork Count {repo.forks_count}</span>
+    <br>
+    </br>
     </div>
     )
   }

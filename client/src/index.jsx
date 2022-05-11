@@ -19,10 +19,10 @@ class App extends React.Component {
   componentDidMount () {
 
     axios.get('/repos')
-    .then(function (collection) {
-      console.log(collection);
+    .then((collection)=> {
+      console.log('collection.data', collection.data);
       this.setState({
-        repos: collection
+        repos: collection.data
       })
     })
     .catch(function (error) {
@@ -47,26 +47,47 @@ class App extends React.Component {
   search (term) {
     console.log(`${term} was searched`);
 
-    $.ajax('/repos', {
-      method: 'POST',
-      dataType: 'text/plain',
-      data: {'searchedTerm': term},
-      success: function(response){
-        //if request if made successfully then the response represent the data
-        console.log('NOW DOING GET', response)
-        $.ajax('/repos', {
-          method: 'GET',
-          dataType: 'text/plain',
-          data: {'searchedTerm': term},
-          success: function(collection){
-            console.log('BOTH WORKED', collection)
-            this.setState({
-              repos: collection
-            })
-          }
-        })
-      }
+
+    axios.post('/repos', {
+      username: term
     })
+    .then(()=> {
+      return axios.get('/repos')
+    })
+    .then((collection)=> {
+      //function to RENDER
+      console.log('collection.data', collection.data)
+      this.setState({
+        repos: collection.data
+      })
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+
+
+
+
+    // $.ajax('/repos', {
+    //   method: 'POST',
+    //   dataType: 'text/plain',
+    //   data: {'searchedTerm': term},
+    //   success: function(response){
+    //     //if request if made successfully then the response represent the data
+    //     console.log('NOW DOING GET', response)
+    //     $.ajax('/repos', {
+    //       method: 'GET',
+    //       dataType: 'text/plain',
+    //       data: {'searchedTerm': term},
+    //       success: function(collection){
+    //         console.log('BOTH WORKED', collection)
+    //         this.setState({
+    //           repos: collection
+    //         })
+    //       }
+    //     })
+    //   }
+    // })
   }
 
   handleRepoListEntry () {
