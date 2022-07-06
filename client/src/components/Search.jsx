@@ -27,7 +27,7 @@ class Search extends React.Component {
     console.log(this.props.repos);
     let reposInfo;
     if(this.props.repos.length === 0) {
-      reposInfo = <h4>Add more repos!</h4>
+      reposInfo =  <h4>Add more repos!</h4>
     }
 
 
